@@ -158,7 +158,12 @@ class CofScheduleExtension {
 
         for (const course of courses) {
             const row = document.createElement('tr');
-            const cols = [course.name, course.location, course.day, course.time];
+            const cols = [
+                course.name,
+                course.location,
+                course.day,
+                course.time,
+            ];
             for (const col of cols) {
                 const colElement = document.createElement('td');
                 colElement.textContent = col;
@@ -181,4 +186,4 @@ function getPageSource(): string {
     }
 }
 
-const cofScheduleExtension = new CofScheduleExtension();
+new CofScheduleExtension();
