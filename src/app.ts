@@ -131,11 +131,11 @@ function getClass(sourceCode: string): string[] {
     return classArray;
 }
 
-// Create a logo element and append it to the content element
-const logo = document.createElement('img');
-logo.id = 'logo';
-logo.src = 'assets/fulllogo_nobuffer.png';
-content.prepend(logo);
+// // Create a logo element and append it to the content element
+// const logo = document.createElement('img');
+// logo.id = 'logo';
+// logo.src = 'assets/fulllogo_nobuffer.png';
+// content.prepend(logo);
 
 // check if the table schedule is in the local storage
 const tableSchedule = localStorage.getItem('table_schedule');
