@@ -103,3 +103,54 @@ button:hover {
     outline-offset: 15px;
     text-shadow: 1px 1px 2px #427388;
 }
+
+/* schedule.css */
+table.schedule {
+    border-collapse: collapse;
+    background-color: #282828;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.3);
+}
+
+table.schedule th,
+table.schedule td {
+    padding: 8px;
+    border: 1px solid #444;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100px;
+    transition: all 0.3s ease-in-out;
+}
+
+table.schedule th {
+    background-color: #383838;
+}
+
+table.schedule th:first-child {
+    border-top-left-radius: 10px;
+}
+
+table.schedule th:last-child {
+    border-top-right-radius: 10px;
+}
+
+table.schedule td:last-child {
+    border-bottom-right-radius: 10px;
+}
+
+table.schedule td:first-child {
+    background-color: #383838;
+    border-bottom-left-radius: 10px;
+}
+
+table.schedule td:hover {
+    background-color: #444;
+    cursor: pointer;
+    white-space: normal;
+    transform: scale(1.1);
+}

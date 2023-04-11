@@ -158,13 +158,8 @@ class CofScheduleExtension {
     private showSchedule(courses: Course[]): void {
         const days = ['Mon.', 'Tue.', 'Wed.', 'Thur.', 'Fri.'];
         const table = document.createElement('table');
-        table.style.borderCollapse = 'collapse';
-        table.style.backgroundColor = '#282828';
-        table.style.color = '#ffffff';
-        table.style.fontFamily = 'Arial, sans-serif';
-        table.style.width = '100%';
-        table.style.borderRadius = '10px';
-        table.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
+        // add class "schedule" to the table
+        table.classList.add('schedule');
 
         // Table header
         const header = document.createElement('tr');
@@ -172,11 +167,6 @@ class CofScheduleExtension {
         days.forEach(headerName => {
             const th = document.createElement('th');
             th.textContent = headerName;
-            th.style.padding = '8px';
-            th.style.border = '1px solid #444';
-            th.style.backgroundColor = '#383838';
-            th.style.textAlign = 'center';
-            th.style.width = '100px';
             header.appendChild(th);
         });
         table.appendChild(header);
@@ -186,13 +176,6 @@ class CofScheduleExtension {
             const tr = document.createElement('tr');
             for (let j = 0; j < 6; j++) {
                 const td = document.createElement('td');
-                td.style.padding = '8px';
-                td.style.border = '1px solid #444';
-                td.style.textAlign = 'center';
-                td.style.whiteSpace = 'nowrap';
-                td.style.overflow = 'hidden';
-                td.style.textOverflow = 'ellipsis';
-                td.style.width = '100px';
 
                 if (j === 0) {
                     td.textContent = `${i + 8}:10~${i + 9}:00`;
