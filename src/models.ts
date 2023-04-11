@@ -5,7 +5,8 @@ interface TabQueryResult {
 }
 
 interface Course {
-    name: string;
+    en_name: string;
+    zh_name: string;
     location: string;
     day: string;
     time: string;

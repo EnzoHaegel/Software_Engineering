@@ -21,7 +21,10 @@ class CofScheduleExtension {
                 const activeTab = tabQueryResults[0];
                 const activeUrl = activeTab.url;
 
-                if (activeUrl.includes('cof.ntpu.edu.tw')) {
+                if (
+                    activeUrl.includes('cof.ntpu.edu.tw') ||
+                    activeUrl.includes('my.ntpu.edu.tw/')
+                ) {
                     this.setupScheduleButton(activeTab);
                 } else {
                     this.setupNonCofSiteMessage();
@@ -42,7 +45,6 @@ class CofScheduleExtension {
                     func: getPageSource,
                 })
                 .then(injectionResults => {
-                    console.log('injectionResults: ', injectionResults);
                     const sourceCode = injectionResults[0].result;
                     // the result is html code table of the schedule, add it to the current extension page
                     const parser = new DOMParser();
@@ -59,9 +61,9 @@ class CofScheduleExtension {
                     localStorage.setItem('table_schedule', sourceCode);
                     this.setupLocalStorage();
 
-                    // const courses = this.parseSchedule(String(table));
-                    // console.log(courses);
-                    // this.showSchedule(courses);
+                    const courses = this.parseHtmlToCourses(sourceCode);
+                    console.log(courses);
+                    this.showSchedule(courses);
                 });
         });
     }
@@ -85,7 +87,7 @@ class CofScheduleExtension {
     }
 
     private setupLocalStorage(): void {
-        const tableSchedule = localStorage.getItem('table_schedule');
+        const tableSchedule = localStorage.getItem('table_schedulev2');
 
         if (tableSchedule) {
             const parser = new DOMParser();
@@ -114,64 +116,122 @@ class CofScheduleExtension {
         }
     }
 
-    private parseSchedule(html: string): Course[] {
+    private parseHtmlToCourses = (html: string): Course[] => {
+        const days = ['Mon.', 'Tue.', 'Wed.', 'Thur.', 'Fri.', 'Sat.', 'Sun.'];
+        const courses: Course[] = [];
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
-        const rows = Array.from(doc.querySelectorAll('tr'));
-        const headerCols = Array.from(rows[0].querySelectorAll('th'));
-        const days = headerCols.slice(1).map(col => col.textContent?.trim());
-        const courses: Course[] = [];
-
-        for (let i = 1; i < rows.length; i++) {
-            const cols = Array.from(rows[i].querySelectorAll('td'));
-            const time = cols[0]?.textContent?.trim();
-            for (let j = 1; j < cols.length; j++) {
-                const courseInfo = cols[j].innerHTML.trim().split('<br>');
-                if (courseInfo.length >= 3) {
-                    const name = courseInfo[0];
-                    const location = courseInfo[2];
-                    const course = {
-                        name,
-                        location,
-                        day: days[j - 1] || '',
-                        time: time || '',
-                    };
-                    courses.push(course);
-                }
+        const rows = doc.querySelectorAll('tr');
+        rows.forEach(row => {
+            const time = row.querySelector('th')?.textContent?.trim() || '';
+            if (time) {
+                const cells = row.querySelectorAll('td');
+                cells.forEach((cell, dayIndex) => {
+                    const courseElements = cell.querySelectorAll(
+                        'font:not([color="green"])'
+                    );
+                    const locationElement = cell.querySelector(
+                        'font[color="green"]'
+                    );
+                    if (courseElements.length > 0) {
+                        const en_name =
+                            courseElements[0]?.textContent?.trim() || '';
+                        const zh_name =
+                            courseElements[1]?.textContent?.trim() || '';
+                        const location =
+                            locationElement?.textContent?.trim() || '';
+                        const day = days[dayIndex];
+                        courses.push({
+                            en_name,
+                            zh_name,
+                            location,
+                            day,
+                            time: time.slice(1),
+                        });
+                    }
+                });
             }
-        }
-
+        });
         return courses;
-    }
+    };
 
     private showSchedule(courses: Course[]): void {
-        // create a cool dark theme schedule table with material ui
+        const days = ['Mon.', 'Tue.', 'Wed.', 'Thur.', 'Fri.'];
         const table = document.createElement('table');
-        const headerRow = document.createElement('tr');
-        const headerCols = ['Name', 'Location', 'Day', 'Time'];
-        for (const headerCol of headerCols) {
-            const col = document.createElement('th');
-            col.textContent = headerCol;
-            headerRow.appendChild(col);
-        }
-        table.appendChild(headerRow);
+        table.style.borderCollapse = 'collapse';
+        table.style.backgroundColor = '#282828';
+        table.style.color = '#ffffff';
+        table.style.fontFamily = 'Arial, sans-serif';
+        table.style.width = '100%';
+        table.style.borderRadius = '10px';
+        table.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
 
-        for (const course of courses) {
-            const row = document.createElement('tr');
-            const cols = [
-                course.name,
-                course.location,
-                course.day,
-                course.time,
-            ];
-            for (const col of cols) {
-                const colElement = document.createElement('td');
-                colElement.textContent = col;
-                row.appendChild(colElement);
+        // Table header
+        const header = document.createElement('tr');
+        days.unshift('');
+        days.forEach(headerName => {
+            const th = document.createElement('th');
+            th.textContent = headerName;
+            th.style.padding = '8px';
+            th.style.border = '1px solid #444';
+            th.style.backgroundColor = '#383838';
+            th.style.textAlign = 'center';
+            th.style.width = '100px';
+            header.appendChild(th);
+        });
+        table.appendChild(header);
+
+        // Table body
+        for (let i = 1; i <= 10; i++) {
+            const tr = document.createElement('tr');
+            for (let j = 0; j < 6; j++) {
+                const td = document.createElement('td');
+                td.style.padding = '8px';
+                td.style.border = '1px solid #444';
+                td.style.textAlign = 'center';
+                td.style.whiteSpace = 'nowrap';
+                td.style.overflow = 'hidden';
+                td.style.textOverflow = 'ellipsis';
+                td.style.width = '100px';
+
+                if (j === 0) {
+                    td.textContent = `${i + 8}:10~${i + 9}:00`;
+                    td.style.backgroundColor = '#383838';
+                } else {
+                    const course = courses.find(
+                        course =>
+                            course.day === days[j] &&
+                            course.time === `${i + 8}:10~${i + 9}:00`
+                    );
+
+                    if (course) {
+                        td.innerHTML = `
+                  <div>${course.en_name}</div>
+                  <div><small>${course.zh_name}</small></div>
+                  <div><small style="color: #32cd32">${course.location}</small></div>
+                `;
+                    }
+                }
+                tr.appendChild(td);
             }
-            table.appendChild(row);
+            table.appendChild(tr);
         }
-        this.contentElement.appendChild(table);
+
+        // Add table to the DOM
+        const container = document.getElementById('scheduleContainer');
+        if (container) {
+            container.innerHTML = '';
+            const oldTable = container.querySelector('table');
+            if (oldTable) {
+                container.removeChild(oldTable);
+            }
+            localStorage.setItem('table_schedulev2', table.outerHTML);
+            container.appendChild(table);
+        } else {
+            console.error(
+                'Container element with ID "scheduleContainer" not found.'
+            );
+        }
     }
 }
 
