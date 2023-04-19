@@ -11,7 +11,9 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
     - name: Set up Node.js
       uses: actions/setup-node@v2
@@ -24,24 +26,23 @@ jobs:
     - name: Build
       run: npm run build
 
-    - name: Auto-increment version
-      id: auto-increment-version
-      uses: phips28/gh-action-bump-version@master
-      with:
-        tag-prefix: 'v'
-        version-file-path: './package.json'
+    - name: Bump version and push tag
+      id: bump-version-and-push-tag
+      uses: anothrNick/github-tag-action@1.26.0
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        WITH_V: true
+        DEFAULT_BUMP: minor
 
     - name: Create a GitHub release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
-        tag_name: ${{ steps.auto-increment-version.outputs.new_version }}
-        release_name: Release ${{ steps.auto-increment-version.outputs.new_version }}
+        tag_name: ${{ steps.bump-version-and-push-tag.outputs.tag }}
+        name: Release ${{ steps.bump-version-and-push-tag.outputs.tag }}
         body: |
           Changes in this release:
-          - ${{ steps.auto-increment-version.outputs.changes }}
+          - ${{ steps.bump-version-and-push-tag.outputs.changes }}
         draft: false
         prerelease: false
