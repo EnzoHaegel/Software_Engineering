@@ -88,32 +88,28 @@ class CofScheduleExtension {
 
     private setupLocalStorage(): void {
         const tableSchedule = localStorage.getItem('table_schedulev2');
+        const courses = localStorage.getItem('courses');
 
-        if (tableSchedule) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(tableSchedule, 'text/html');
-            const table = doc.getElementsByTagName('table')[0];
-            this.contentElement.appendChild(table);
-
-            // check if a button with button_clear_storage as id exist
-            if (document.getElementById('button_clear_storage')) {
-                return;
-            }
-
-            // add a button to clear the local storage
-            const button = document.createElement('button');
-            button.id = 'button_clear_storage';
-            button.textContent = 'Clear Local Storage';
-            this.contentElement.appendChild(button);
-
-            button.addEventListener('click', () => {
-                localStorage.clear();
-                this.contentElement.removeChild(button);
-                this.contentElement.removeChild(
-                    this.contentElement.getElementsByTagName('table')[0]
-                );
-            });
+        if (courses) {
+            this.showSchedule(JSON.parse(courses));
         }
+        if (document.getElementById('button_clear_storage')) {
+            return;
+        }
+
+        // add a button to clear the local storage
+        const button = document.createElement('button');
+        button.id = 'button_clear_storage';
+        button.textContent = 'Clear Local Storage';
+        this.contentElement.appendChild(button);
+
+        button.addEventListener('click', () => {
+            localStorage.clear();
+            this.contentElement.removeChild(button);
+            this.contentElement.removeChild(
+                this.contentElement.getElementsByTagName('table')[0]
+            );
+        });
     }
 
     private parseHtmlToCourses = (html: string): Course[] => {
@@ -152,16 +148,15 @@ class CofScheduleExtension {
                 });
             }
         });
+        localStorage.setItem('courses', JSON.stringify(courses));
         return courses;
     };
 
     private showSchedule(courses: Course[]): void {
+        console.log('courses', courses);
         const days = ['Mon.', 'Tue.', 'Wed.', 'Thur.', 'Fri.'];
         const table = document.createElement('table');
-        // add class "schedule" to the table
         table.classList.add('schedule');
-
-        // Table header
         const header = document.createElement('tr');
         days.unshift('');
         days.forEach(headerName => {
@@ -195,7 +190,26 @@ class CofScheduleExtension {
                 `;
                     }
                 }
-                tr.appendChild(td);
+                const date = new Date();
+                const currentMinute = date.getMinutes();
+                if (
+                    i + 8 === date.getHours() &&
+                    currentMinute >= 10 &&
+                    currentMinute < 60 &&
+                    j === date.getDay()
+                ) {
+                    tr.appendChild(td);
+                    // add a little line in the box, to indicate the current time
+                    const line = document.createElement('div');
+                    line.style.width = '100%';
+                    line.style.height = '1px';
+                    line.style.backgroundColor = '#32cd32';
+                    const linePosition = (currentMinute - 10) / 50;
+                    line.style.top = `${linePosition * 100}%`;
+                    td.appendChild(line);
+                } else {
+                    tr.appendChild(td);
+                }
             }
             table.appendChild(tr);
         }
@@ -230,3 +244,6 @@ function getPageSource(): string {
 }
 
 new CofScheduleExtension();
+
+
+// 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
