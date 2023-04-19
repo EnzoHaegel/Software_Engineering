@@ -1,6 +1,8 @@
-# SoftWare Engineering
+# Software Engineering
 
 [![GitHub release](https://img.shields.io/github/release/EnzoHaegel/Software_Engineering.svg)](https://github.com/EnzoHaegel/Software_Engineering/releases)
+
+This is a college project for the class Software Engineering at NTPU, we are 3 students, and we have to do a software.
 
 This project is a Chrome and Edge extension developed using TypeScript. The extension is designed to help you with your schedule. This README will guide you through the process of installing the extension on both Chrome and Edge browsers.
 
