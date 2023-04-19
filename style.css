@@ -1,0 +1,159 @@
+body {
+    background-color: #202020;
+    font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+    font-size: 16px;
+}
+
+#content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px;
+}
+
+a {
+    font-size: 18px;
+    color: #0074d9;
+    text-decoration: none;
+    margin: 10px;
+}
+
+#message {
+    font-size: 18px;
+    color: #ff4136;
+    margin: 10px;
+}
+
+#logo {
+    width: 50%;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: none;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background: rgb(100, 100, 100);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    border-radius: 8px;
+    background: rgb(142, 142, 142);
+}
+
+.button-cof {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0 solid;
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0);
+    outline: 1px solid;
+    outline-color: rgba(255, 255, 255, 0.5);
+    outline-offset: 0px;
+    text-shadow: none;
+    padding: 10px;
+    margin: 10px;
+    color: #fff;
+    background-color: #424242;
+    cursor: pointer;
+    transition: all 1250ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.button-cof:hover {
+    border: 1px solid;
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5),
+        0 0 20px rgba(255, 255, 255, 0.2);
+    outline-color: rgba(255, 255, 255, 0);
+    outline-offset: 15px;
+    text-shadow: 1px 1px 2px #427388;
+}
+
+button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0 solid;
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0);
+    outline: 1px solid;
+    outline-color: rgba(255, 255, 255, 0.5);
+    outline-offset: 0px;
+    text-shadow: none;
+    padding: 10px;
+    margin: 10px;
+    color: #fff;
+    background-color: #424242;
+    cursor: pointer;
+    transition: all 1250ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+button:hover {
+    border: 1px solid;
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5),
+        0 0 20px rgba(255, 255, 255, 0.2);
+    outline-color: rgba(255, 255, 255, 0);
+    outline-offset: 15px;
+    text-shadow: 1px 1px 2px #427388;
+}
+
+/* schedule.css */
+table.schedule {
+    border-collapse: collapse;
+    background-color: #282828;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.3);
+    margin: 10px;
+}
+
+table.schedule th,
+table.schedule td {
+    padding: 8px;
+    border: 1px solid #444;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100px;
+    transition: all 0.2s ease-in-out;
+}
+
+table.schedule th {
+    background-color: #383838;
+}
+
+table.schedule th:first-child {
+    border-top-left-radius: 10px;
+}
+
+table.schedule th:last-child {
+    border-top-right-radius: 10px;
+}
+
+table.schedule td:last-child {
+    border-bottom-right-radius: 10px;
+}
+
+table.schedule td:first-child {
+    background-color: #383838;
+    border-bottom-left-radius: 10px;
+}
+
+table.schedule td:hover {
+    z-index: 100;
+    background-color: #444;
+    cursor: pointer;
+    white-space: normal;
+    transform: scale(1.1);
+    border-radius: 10px;
+}

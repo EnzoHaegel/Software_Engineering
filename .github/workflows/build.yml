@@ -1,0 +1,30 @@
+name: Check if npm compile works
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.x'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Run compile
+      run: npm run compile
+
+    - name: Check if compiled
+      run: |
+        if [ $? -eq 0 ]; then
+          echo "Compile succeeded"
+        else
+          echo "Compile failed"
+          exit 1
+        fi

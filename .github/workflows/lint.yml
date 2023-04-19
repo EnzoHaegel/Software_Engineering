@@ -1,0 +1,29 @@
+name: Lint
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  lint:
+    name: Linting check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Check if no errors
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "Linting succeeded"
+          else
+            echo "Linting failed"
+            exit 1
+          fi
