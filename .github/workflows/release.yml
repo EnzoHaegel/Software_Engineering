@@ -46,3 +46,4 @@ jobs:
           - ${{ steps.bump-version-and-push-tag.outputs.changes }}
         draft: false
         prerelease: false
+
