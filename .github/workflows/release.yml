@@ -26,7 +26,7 @@ jobs:
 
     - name: Auto-increment version
       id: auto-increment-version
-      uses: phips28/gh-action-bump-version@v10.0.0
+      uses: phips28/gh-action-bump-version@master
       with:
         tag-prefix: 'v'
         version-file-path: './package.json'
