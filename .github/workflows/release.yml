@@ -24,23 +24,24 @@ jobs:
     - name: Build
       run: npm run build
 
-    - name: Auto-increment version and create a release
-      uses: actions-ecosystem/action-bump-semver@v1
-      id: bump-semver
+    - name: Auto-increment version
+      id: auto-increment-version
+      uses: phips28/gh-action-bump-version@v10.0.0
       with:
-        github_token: ${{ secrets.GH_TOKEN }}
-        semver_level: minor
-        create_tag: true
+        tag-prefix: 'v'
+        version-file-path: './package.json'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
     - name: Create a GitHub release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
-        tag_name: ${{ steps.bump-semver.outputs.new_tag }}
-        release_name: Release ${{ steps.bump-semver.outputs.new_tag }}
+        tag_name: ${{ steps.auto-increment-version.outputs.new_version }}
+        release_name: Release ${{ steps.auto-increment-version.outputs.new_version }}
         body: |
           Changes in this release:
-          - ${{ steps.bump-semver.outputs.changes }}
+          - ${{ steps.auto-increment-version.outputs.changes }}
         draft: false
         prerelease: false
