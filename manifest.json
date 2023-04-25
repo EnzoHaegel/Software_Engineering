@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Hello Extensions",
-    "description": "Base Level Extension",
-    "version": "1.0",
+    "name": "CourseMate",
+    "description": "Manage your NTPU schedule easily!",
+    "version": "1.1",
     "permissions": [
       "cookies",
       "tabs",
@@ -11,6 +11,6 @@
     ],
     "action": {
         "default_popup": "index.html",
-        "default_icon": "assets/fulllogo_nobuffer.png"
+        "default_icon": "assets/logo.png"
     }
 }
