@@ -1,5 +1,82 @@
+interface TabQueryResult {
+    id: number;
+    url: string;
+    title: string;
+}
+
+enum Day {
+    NONE = 'NONE',
+    MONDAY = 'Monday',
+    TUESDAY = 'Tuesday',
+    WEDNESDAY = 'Wednesday',
+    THURSDAY = 'Thursday',
+    FRIDAY = 'Friday',
+    SATURDAY = 'Saturday',
+    SUNDAY = 'Sunday',
+}
+
+enum Time {
+    ONE = '1',
+    TWO = '2',
+    THREE = '3',
+    FOUR = '4',
+    FIVE = '5',
+    SIX = '6',
+    SEVEN = '7',
+    EIGHT = '8',
+    NINE = '9',
+    TEN = '10',
+}
+
+interface Course {
+    en_name: string;
+    zh_name: string;
+    location: string;
+    day: Day;
+    time: Time;
+}
+
+interface Schedule {
+    program: string;
+    semester: string;
+    department: string;
+    teacher: string;
+    courses: Course[];
+}
+
+const DayMapping: Record<string, Day> = {
+    MONDAY: Day.MONDAY,
+    TUESDAY: Day.TUESDAY,
+    WEDNESDAY: Day.WEDNESDAY,
+    THURSDAY: Day.THURSDAY,
+    FRIDAY: Day.FRIDAY,
+    NONE: Day.NONE,
+};
+
+const TimeMapping: Record<number, Time> = {
+    1: Time.ONE,
+    2: Time.TWO,
+    3: Time.THREE,
+    4: Time.FOUR,
+    5: Time.FIVE,
+    6: Time.SIX,
+    7: Time.SEVEN,
+    8: Time.EIGHT,
+    9: Time.NINE,
+    10: Time.TEN,
+};
+
 class CofScheduleExtension {
     private readonly contentElement: HTMLElement;
+
+    private readonly dayMapping = [
+        Day.MONDAY,
+        Day.TUESDAY,
+        Day.WEDNESDAY,
+        Day.THURSDAY,
+        Day.FRIDAY,
+        Day.NONE,
+    ];
 
     constructor() {
         this.contentElement =
@@ -62,8 +139,7 @@ class CofScheduleExtension {
                     this.setupLocalStorage();
 
                     const courses = this.parseHtmlToCourses(sourceCode);
-                    console.log(courses);
-                    this.showSchedule(courses);
+                    this.showSchedule(courses.courses);
                 });
         });
     }
@@ -90,9 +166,9 @@ class CofScheduleExtension {
         const tableSchedule = localStorage.getItem('table_schedulev2');
         const courses = localStorage.getItem('courses');
 
-        if (courses) {
-            this.showSchedule(JSON.parse(courses));
-        }
+        // if (courses) {
+        //     this.showSchedule(JSON.parse(courses));
+        // }
         if (document.getElementById('button_clear_storage')) {
             return;
         }
@@ -112,62 +188,93 @@ class CofScheduleExtension {
         });
     }
 
-    private parseHtmlToCourses = (html: string): Course[] => {
-        const days = ['Mon.', 'Tue.', 'Wed.', 'Thur.', 'Fri.', 'Sat.', 'Sun.'];
-        const courses: Course[] = [];
+    private parseHtmlToCourses = (html: string): Schedule => {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
-        const rows = doc.querySelectorAll('tr');
-        rows.forEach(row => {
-            const time = row.querySelector('th')?.textContent?.trim() || '';
-            if (time) {
-                const cells = row.querySelectorAll('td');
-                cells.forEach((cell, dayIndex) => {
-                    const courseElements = cell.querySelectorAll(
-                        'font:not([color="green"])'
-                    );
-                    const locationElement = cell.querySelector(
-                        'font[color="green"]'
-                    );
-                    if (courseElements.length > 0) {
-                        const en_name =
-                            courseElements[0]?.textContent?.trim() || '';
-                        const zh_name =
-                            courseElements[1]?.textContent?.trim() || '';
-                        const location =
-                            locationElement?.textContent?.trim() || '';
-                        const day = days[dayIndex];
-                        courses.push({
-                            en_name,
-                            zh_name,
-                            location,
-                            day,
-                            time: time.slice(1),
-                        });
-                    }
-                });
-            }
+
+        const h3 = doc.querySelector('h3');
+        const h4 = doc.querySelector('h4');
+        const table = doc.querySelector('table');
+
+        const programSemester = h3?.textContent?.match(/(\d+)/g) || [];
+        const program = programSemester[0];
+        const semester = programSemester[1];
+
+        const teacherDept = h4?.textContent?.split(' ') || [];
+        const department = teacherDept[1];
+        const teacher = teacherDept[2];
+        const firstRowCells =
+            table?.querySelector('tr')?.querySelectorAll('th, td') || [];
+
+        const courses: Course[] = [];
+        const trElements = table?.querySelectorAll('tr') || [];
+
+        const timeKeys = Object.keys(Time) as Array<keyof typeof Time>;
+
+        trElements.forEach((tr, i) => {
+            if (i === 0) return;
+
+            const tdElements = tr.querySelectorAll('td');
+
+            tdElements.forEach((td, j) => {
+                const en_name = td.firstChild?.textContent?.trim() || '';
+                const zh_name =
+                    td.querySelector("font[size='2']")?.textContent?.trim() ||
+                    '';
+                const location =
+                    td.querySelector("font[size='1']")?.textContent?.trim() ||
+                    '';
+
+                // Update the day assignment
+                const day = this.dayMapping[j];
+
+                if (day) {
+                    const time = Time[timeKeys[i - 1]];
+
+                    const course: Course = {
+                        en_name,
+                        zh_name,
+                        location,
+                        day,
+                        time,
+                    };
+                    courses.push(course);
+                }
+            });
         });
-        localStorage.setItem('courses', JSON.stringify(courses));
-        return courses;
+
+        const schedule: Schedule = {
+            program: program || '',
+            semester,
+            department,
+            teacher,
+            courses,
+        };
+        console.log('schedule:', schedule);
+        return schedule;
     };
 
     private showSchedule(courses: Course[]): void {
-        console.log('courses', courses);
-        const days = ['Mon.', 'Tue.', 'Wed.', 'Thur.', 'Fri.'];
+        const days = [
+            {short: 'Mon.', full: Day.MONDAY},
+            {short: 'Tue.', full: Day.TUESDAY},
+            {short: 'Wed.', full: Day.WEDNESDAY},
+            {short: 'Thur.', full: Day.THURSDAY},
+            {short: 'Fri.', full: Day.FRIDAY},
+        ];
         const table = document.createElement('table');
         table.classList.add('schedule');
         const header = document.createElement('tr');
-        days.unshift('');
+        days.unshift({short: '', full: Day.NONE});
         days.forEach(headerName => {
             const th = document.createElement('th');
-            th.textContent = headerName;
+            th.textContent = headerName.short;
             header.appendChild(th);
         });
         table.appendChild(header);
 
         // Table body
-        for (let i = 1; i <= 10; i++) {
+        for (let i = parseInt(Time.ONE); i <= parseInt(Time.TEN); i++) {
             const tr = document.createElement('tr');
             for (let j = 0; j < 6; j++) {
                 const td = document.createElement('td');
@@ -178,38 +285,24 @@ class CofScheduleExtension {
                 } else {
                     const course = courses.find(
                         course =>
-                            course.day === days[j] &&
-                            course.time === `${i + 8}:10~${i + 9}:00`
+                            course.day === days[j].full &&
+                            course.time === i.toString()
                     );
 
                     if (course) {
+                        const enNameDivs = course.en_name
+                            .split(' ')
+                            .map(word => `<div>${word}</div>`);
                         td.innerHTML = `
-                  <div>${course.en_name}</div>
-                  <div><small>${course.zh_name}</small></div>
-                  <div><small style="color: #32cd32">${course.location}</small></div>
-                `;
+                          <div>${enNameDivs.join('')}</div>
+                          <div><small>${course.zh_name}</small></div>
+                          <div><small style="color: #32cd32">${
+                              course.location
+                          }</small></div>
+                        `;
                     }
                 }
-                const date = new Date();
-                const currentMinute = date.getMinutes();
-                if (
-                    i + 8 === date.getHours() &&
-                    currentMinute >= 10 &&
-                    currentMinute < 60 &&
-                    j === date.getDay()
-                ) {
-                    tr.appendChild(td);
-                    // add a little line in the box, to indicate the current time
-                    const line = document.createElement('div');
-                    line.style.width = '100%';
-                    line.style.height = '1px';
-                    line.style.backgroundColor = '#32cd32';
-                    const linePosition = (currentMinute - 10) / 50;
-                    line.style.top = `${linePosition * 100}%`;
-                    td.appendChild(line);
-                } else {
-                    tr.appendChild(td);
-                }
+                tr.appendChild(td);
             }
             table.appendChild(tr);
         }
@@ -244,6 +337,5 @@ function getPageSource(): string {
 }
 
 new CofScheduleExtension();
-
 
 // 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
