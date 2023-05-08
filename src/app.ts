@@ -126,19 +126,20 @@ class CofScheduleExtension {
                     // the result is html code table of the schedule, add it to the current extension page
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(sourceCode, 'text/html');
-                    const table = doc.getElementsByTagName('table')[0];
-
+                    
                     // if a child table exist remove it
                     if (this.contentElement.getElementsByTagName('table')[0]) {
                         this.contentElement.removeChild(
                             this.contentElement.getElementsByTagName('table')[0]
                         );
                     }
+                    const table = doc.getElementsByTagName('table')[0];
 
                     localStorage.setItem('table_schedule', sourceCode);
                     this.setupLocalStorage();
 
                     const courses = this.parseHtmlToCourses(sourceCode);
+                    localStorage.setItem('Schedule', JSON.stringify(courses));
                     this.showSchedule(courses.courses);
                 });
         });
@@ -163,15 +164,12 @@ class CofScheduleExtension {
     }
 
     private setupLocalStorage(): void {
-        const tableSchedule = localStorage.getItem('table_schedulev2');
-        const courses = localStorage.getItem('courses');
+        const schedule: Schedule = JSON.parse(
+            localStorage.getItem('Schedule')!
+        );
 
-        // if (courses) {
-        //     this.showSchedule(JSON.parse(courses));
-        // }
-        if (document.getElementById('button_clear_storage')) {
-            return;
-        }
+        if (schedule) this.showSchedule(schedule.courses);
+        if (document.getElementById('button_clear_storage')) return;
 
         // add a button to clear the local storage
         const button = document.createElement('button');
@@ -191,7 +189,6 @@ class CofScheduleExtension {
     private parseHtmlToCourses = (html: string): Schedule => {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
-
         const h3 = doc.querySelector('h3');
         const h4 = doc.querySelector('h4');
         const table = doc.querySelector('table');
@@ -199,21 +196,15 @@ class CofScheduleExtension {
         const programSemester = h3?.textContent?.match(/(\d+)/g) || [];
         const program = programSemester[0];
         const semester = programSemester[1];
-
         const teacherDept = h4?.textContent?.split(' ') || [];
         const department = teacherDept[1];
         const teacher = teacherDept[2];
-        const firstRowCells =
-            table?.querySelector('tr')?.querySelectorAll('th, td') || [];
-
         const courses: Course[] = [];
         const trElements = table?.querySelectorAll('tr') || [];
-
         const timeKeys = Object.keys(Time) as Array<keyof typeof Time>;
 
         trElements.forEach((tr, i) => {
             if (i === 0) return;
-
             const tdElements = tr.querySelectorAll('td');
 
             tdElements.forEach((td, j) => {
@@ -255,6 +246,7 @@ class CofScheduleExtension {
     };
 
     private showSchedule(courses: Course[]): void {
+        localStorage.setItem('printed', 'true');
         const days = [
             {short: 'Mon.', full: Day.MONDAY},
             {short: 'Tue.', full: Day.TUESDAY},
