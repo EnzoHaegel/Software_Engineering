@@ -1,7 +1,7 @@
 // Initialize Line Messaging API SDK with your Channel Access Token
 const line = require('@line/bot-sdk');
 const lineClient = new line.Client({
-  channelAccessToken: 'e3b4ba87b192ed62b4c5e9d3e08317f0',
+  channelAccessToken: 'YOUR_ACCESS_Token',
 });
 
 // Handle Line webhook events
