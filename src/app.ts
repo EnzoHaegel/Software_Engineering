@@ -87,6 +87,10 @@ class CofScheduleExtension {
     }
 
     private setupTabListener(): void {
+        chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
+            console.log(token);
+        });
+
         chrome.tabs.query(
             {currentWindow: true, active: true},
             (tabs: chrome.tabs.Tab[]) => {

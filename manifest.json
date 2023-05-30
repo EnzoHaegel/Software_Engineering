@@ -3,14 +3,14 @@
     "name": "CourseMate",
     "description": "Manage your NTPU schedule easily!",
     "version": "1.1",
-    "permissions": [
-      "cookies",
-      "tabs",
-      "scripting",
-      "activeTab"
-    ],
+    "permissions": ["cookies", "tabs", "scripting", "activeTab", "identity"],
+    "oauth2": {
+        "client_id": "332990903033-uil786vg2fm29le166gsbksb5pgq4qa1.apps.googleusercontent.com",
+        "scopes": ["https://www.googleapis.com/auth/calendar"]
+    },
     "action": {
         "default_popup": "index.html",
         "default_icon": "assets/logo.png"
     }
 }
+

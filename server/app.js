@@ -9,7 +9,7 @@ app.use(bodyParser.json());
 
 const CLIENT_ID = OAuth2Data.installed.client_id;
 const CLIENT_SECRET = OAuth2Data.installed.client_secret;
-const REDIRECT_URL = 'http://localhost:3000/auth/google/callback'
+const REDIRECT_URL = 'http://127.0.0.1:3000/auth/google/callback'
 
 const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL)
 
