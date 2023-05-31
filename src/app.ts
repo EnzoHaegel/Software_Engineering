@@ -1,70 +1,5 @@
-interface TabQueryResult {
-    id: number;
-    url: string;
-    title: string;
-}
-
-enum Day {
-    NONE = 'NONE',
-    MONDAY = 'Monday',
-    TUESDAY = 'Tuesday',
-    WEDNESDAY = 'Wednesday',
-    THURSDAY = 'Thursday',
-    FRIDAY = 'Friday',
-    SATURDAY = 'Saturday',
-    SUNDAY = 'Sunday',
-}
-
-enum Time {
-    ONE = '1',
-    TWO = '2',
-    THREE = '3',
-    FOUR = '4',
-    FIVE = '5',
-    SIX = '6',
-    SEVEN = '7',
-    EIGHT = '8',
-    NINE = '9',
-    TEN = '10',
-}
-
-interface Course {
-    en_name: string;
-    zh_name: string;
-    location: string;
-    day: Day;
-    time: Time;
-}
-
-interface Schedule {
-    program: string;
-    semester: string;
-    department: string;
-    teacher: string;
-    courses: Course[];
-}
-
-const DayMapping: Record<string, Day> = {
-    MONDAY: Day.MONDAY,
-    TUESDAY: Day.TUESDAY,
-    WEDNESDAY: Day.WEDNESDAY,
-    THURSDAY: Day.THURSDAY,
-    FRIDAY: Day.FRIDAY,
-    NONE: Day.NONE,
-};
-
-const TimeMapping: Record<number, Time> = {
-    1: Time.ONE,
-    2: Time.TWO,
-    3: Time.THREE,
-    4: Time.FOUR,
-    5: Time.FIVE,
-    6: Time.SIX,
-    7: Time.SEVEN,
-    8: Time.EIGHT,
-    9: Time.NINE,
-    10: Time.TEN,
-};
+import { GoogleCalendarManager } from './googleCalendarManager.js';
+import { Course, Day, Schedule, TabQueryResult, Time } from './models.js';
 
 class CofScheduleExtension {
     private readonly contentElement: HTMLElement;
@@ -78,19 +13,24 @@ class CofScheduleExtension {
         Day.NONE,
     ];
 
+    private readonly DayMappingN: Record<Day, number> = {
+        [Day.MONDAY]: 1,
+        [Day.TUESDAY]: 2,
+        [Day.WEDNESDAY]: 3,
+        [Day.THURSDAY]: 4,
+        [Day.FRIDAY]: 5,
+        [Day.SATURDAY]: 6,
+        [Day.SUNDAY]: 0,
+        [Day.NONE]: 0,
+    };
+
     constructor() {
-        this.contentElement =
-            document.getElementById('content') || document.body;
+        this.contentElement = document.getElementById('content') || document.body;
         this.setupTabListener();
         this.setupLocalStorage();
-        // this.setupGoogleCalendarImportButton();
     }
 
     private setupTabListener(): void {
-        chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
-            console.log(token);
-        });
-
         chrome.tabs.query(
             {currentWindow: true, active: true},
             (tabs: chrome.tabs.Tab[]) => {
@@ -214,12 +154,8 @@ class CofScheduleExtension {
 
             tdElements.forEach((td, j) => {
                 const en_name = td.firstChild?.textContent?.trim() || '';
-                const zh_name =
-                    td.querySelector("font[size='2']")?.textContent?.trim() ||
-                    '';
-                const location =
-                    td.querySelector("font[size='1']")?.textContent?.trim() ||
-                    '';
+                const zh_name = td.querySelector("font[size='2']")?.textContent?.trim() || '';
+                const location = td.querySelector("font[size='1']")?.textContent?.trim() || '';
 
                 // Update the day assignment
                 const day = this.dayMapping[j];
@@ -233,6 +169,7 @@ class CofScheduleExtension {
                         location,
                         day,
                         time,
+                        length: 1
                     };
                     courses.push(course);
                 }
@@ -247,8 +184,17 @@ class CofScheduleExtension {
             courses,
         };
         console.log('schedule:', schedule);
+        chrome.identity.getAuthToken({ 'interactive': true, 'scopes': ['https://www.googleapis.com/auth/calendar'] }, (token) => {
+            token && googleCalendarManager.parseScheduleAndAddToCalendar(schedule, token);
+        });
         return schedule;
     };
+
+    private getWeekStart(date: Date): Date {
+        const weekStart = new Date(date.getTime());
+        weekStart.setDate(date.getDate() - date.getDay() + 1);
+        return weekStart;
+    }
 
     private showSchedule(courses: Course[]): void {
         localStorage.setItem('printed', 'true');
@@ -320,122 +266,6 @@ class CofScheduleExtension {
             );
         }
     }
-
-    // async addCoursesToGoogleCalendar(courses: Course[]) {
-    //     const { installed } = await this.getGoogleCredentials();
-    //     const { client_id, project_id, auth_uri, token_uri, auth_provider_x509_cert_url, client_secret, redirect_uris } = installed;
-    //     const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
-    
-    //     // Check if we have previously stored a token.
-    //     const token = await this.getStoredToken();
-    //     if (!token) {
-    //         // If there's no stored token, get a new token from Google
-    //         this.getNewToken(oAuth2Client);
-    //     } else {
-    //         oAuth2Client.setCredentials(JSON.parse(token));
-    
-    //         // Add courses to the calendar
-    //         const calendar = google.calendar({ version: 'v3', auth: oAuth2Client });
-    //         for (const course of courses) {
-    //             const event = this.courseToGoogleCalendarEvent(course);
-    //             calendar.events.insert({
-    //                 calendarId: 'primary',
-    //                 requestBody: event,
-    //             }, (err: any, event: any) => {
-    //                 if (err) {
-    //                     console.log('There was an error contacting the Calendar service: ' + err);
-    //                     return;
-    //                 }
-    //                 console.log('Event created: %s', event.htmlLink);
-    //             });
-    //         }
-    //     }
-    // }
-
-    // private async getGoogleCredentials(): Promise<any> {
-    //     const credentials = await import('./client_secret_332990903033-uil786vg2fm29le166gsbksb5pgq4qa1.apps.googleusercontent.com.json');
-    //     return credentials.default;
-    // }
-    
-    // private async getStoredToken() {
-    //     // Implement your own logic here to get the token from wherever you have stored it
-    //     const token = localStorage.getItem('token');
-    //     return token;
-    // }
-    
-    // private getNewToken(oAuth2Client: OAuth2Client) {
-    //     const authUrl = oAuth2Client.generateAuthUrl({
-    //         access_type: 'offline',
-    //         scope: ['https://www.googleapis.com/auth/calendar.events'],
-    //     });
-    //     console.log('Authorize this app by visiting this url:', authUrl);
-    //     // In a real-world application, you would redirect your user to authUrl, then get the code parameter in the redirected URL
-    // }
-    
-    // private courseToGoogleCalendarEvent(course: Course) {
-    //     // Convert your course to Google Calendar event format here
-    //     const event = {
-    //         summary: `${course.en_name} (${course.zh_name})`,
-    //         location: course.location,
-    //         description: `${course.en_name} (${course.zh_name}) at ${course.location}`,
-    //         start: {
-    //             dateTime: 'YYYY-MM-DDT09:00:00-07:00', // Replace this with the actual start time
-    //             timeZone: 'Asia/Taipei',
-    //         },
-    //         end: {
-    //             dateTime: 'YYYY-MM-DDT10:00:00-07:00', // Replace this with the actual end time
-    //             timeZone: 'Asia/Taipei',
-    //         },
-    //         recurrence: [
-    //             'RRULE:FREQ=WEEKLY;COUNT=10;BYDAY=' + this.dayToRRULEDay(course.day), // Assumes the course is held weekly for 10 weeks
-    //         ],
-    //     };
-    //     return event;
-    // }
-    
-    // private dayToRRULEDay(day: Day) {
-    //     // Convert Day to RRULE format
-    //     switch (day) {
-    //         case Day.MONDAY:
-    //             return 'MO';
-    //         case Day.TUESDAY:
-    //             return 'TU';
-    //         case Day.WEDNESDAY:
-    //             return 'WE';
-    //         case Day.THURSDAY:
-    //             return 'TH';
-    //         case Day.FRIDAY:
-    //             return 'FR';
-    //         default:
-    //             throw new Error('Invalid day: ' + day);
-    //     }
-    // }
-
-    // private setupGoogleCalendarImportButton(): void {
-    //     const button = document.createElement('button');
-    //     button.textContent = 'Import to Google Calendar';
-    //     this.contentElement.appendChild(button);
-
-    //     button.addEventListener('click', async () => {
-    //         const schedule: Schedule = JSON.parse(
-    //             localStorage.getItem('Schedule')!
-    //         );
-
-    //         if (schedule) {
-    //             try {
-    //                 await this.addCoursesToGoogleCalendar(schedule.courses);
-    //                 button.textContent = 'Imported to Google Calendar';
-    //                 button.disabled = true;
-    //             } catch (err) {
-    //                 console.error('Failed to import to Google Calendar:', err);
-    //                 button.textContent = 'Failed to import to Google Calendar. See console for details.';
-    //             }
-    //         } else {
-    //             console.error('No schedule found in local storage');
-    //             button.textContent = 'No schedule found in local storage. Import the schedule first.';
-    //         }
-    //     });
-    // }
 }
 
 // Function that return source code
@@ -449,6 +279,7 @@ function getPageSource(): string {
     }
 }
 
+const googleCalendarManager = new GoogleCalendarManager();
+
 new CofScheduleExtension();
 
-// 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
