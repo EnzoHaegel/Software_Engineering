@@ -13,17 +13,6 @@ class CofScheduleExtension {
         Day.NONE,
     ];
 
-    private readonly DayMappingN: Record<Day, number> = {
-        [Day.MONDAY]: 1,
-        [Day.TUESDAY]: 2,
-        [Day.WEDNESDAY]: 3,
-        [Day.THURSDAY]: 4,
-        [Day.FRIDAY]: 5,
-        [Day.SATURDAY]: 6,
-        [Day.SUNDAY]: 0,
-        [Day.NONE]: 0,
-    };
-
     constructor() {
         this.contentElement = document.getElementById('content') || document.body;
         this.setupTabListener();
