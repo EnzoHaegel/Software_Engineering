@@ -47,13 +47,14 @@ export class GoogleCalendarManager {
             }
         }
     
+        let i: number = 0;
         for (const key in parsedCourses) {
             const course = parsedCourses[key];
-            this.addEventsToCalendar(token, course);
+            this.addEventsToCalendar(token, course, i++);
         }
     }
 
-    async addEventsToCalendar(token: string, course: Course): Promise<void> {
+    async addEventsToCalendar(token: string, course: Course, i: number): Promise<void> {
         const xhr = new XMLHttpRequest();
         xhr.open('POST', 'https://www.googleapis.com/calendar/v3/calendars/primary/events');
         xhr.setRequestHeader('Authorization', 'Bearer ' + token);
@@ -92,7 +93,7 @@ export class GoogleCalendarManager {
             console.log('Adding event to calendar...');
             console.log("Course: " + course.en_name + " " + course.zh_name + " " + course.location + " " + course.day + " " + course.time);
         };
-        await delay(1000);
+        await delay(i * 1000);
         xhr.send(JSON.stringify(eventData));
     }
 
