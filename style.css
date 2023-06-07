@@ -108,12 +108,13 @@ button:hover {
 table.schedule {
     border-collapse: collapse;
     background-color: #282828;
-    color: #ffffff;
+    color: #eee;
     font-family: Arial, sans-serif;
     width: 100%;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(255, 255, 255, 0.3);
     margin: 10px;
+    font-size: 14px;
 }
 
 table.schedule th,
@@ -156,4 +157,5 @@ table.schedule td:hover {
     white-space: normal;
     transform: scale(1.1);
     border-radius: 10px;
+    color: #fff;
 }
